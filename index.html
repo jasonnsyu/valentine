@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Be My Valentine?</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        text-align: center;
+        font-family: Arial, sans-serif;
+        margin: 0;
+      }
+      .hidden {
+        display: none;
+      }
+      .yes-button,
+      .avail-button,
+      .event-button,
+      .done-button {
+        background-color: #00a36c;
+        color: white;
+        font-weight: bold;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 10px;
+      }
+      .no-button {
+        background-color: red;
+        color: white;
+        font-weight: bold;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .time-button {
+        background-color: gray;
+        color: white;
+        font-weight: bold;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 5px;
+      }
+      .time-button.selected {
+        background-color: #00a36c;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="question">
+      <img src="willyou.gif" />
+      <h1>Will you be my Valentine?</h1>
+      <button id="yes-button" class="yes-button">Yes</button>
+      <button id="no-button" class="no-button">No</button>
+    </div>
+
+    <div id="schedule" class="hidden">
+      <img src="when.gif" />
+      <h1>Ok yay!!! When are you available?</h1>
+      <div id="time-options"></div>
+      <button class="done-button" onclick="sendCalendarInvite()">Done?</button>
+    </div>
+
+    <div id="closing" class="hidden">
+      <img src="cya.gif" id="closing-gif" />
+      <h1>See you on the 14th! Happy Valentine's Day, Charlize!!</h1>
+    </div>
+
+    <script>
+      let noCount = 0;
+      const yesButton = document.getElementById("yes-button");
+      const noButton = document.getElementById("no-button");
+      const questionDiv = document.getElementById("question");
+      const scheduleDiv = document.getElementById("schedule");
+      const closingDiv = document.getElementById("closing");
+      const timeOptionsDiv = document.getElementById("time-options");
+
+      const noPhrases = [
+        "No",
+        "Are you sure?",
+        "Really sure?",
+        "Think again!",
+        "Last chance!",
+        "Surely not?",
+        "You might regret this!",
+        "Give it another thought!",
+        "Are you absolutely certain?",
+        "This could be a mistake!",
+        "Have a heart!",
+        "Don't be so cold!",
+        "Change of heart?",
+        "Wouldn't you reconsider?",
+        "Is that your final answer?",
+        "You're breaking my heart ;(",
+      ];
+
+      yesButton.addEventListener("click", function () {
+        questionDiv.classList.add("hidden");
+        scheduleDiv.classList.remove("hidden");
+      });
+
+      noButton.addEventListener("click", function () {
+        noCount++;
+        noButton.textContent =
+          noPhrases[Math.min(noCount, noPhrases.length - 1)];
+        yesButton.style.fontSize = `${noCount * 20 + 16}px`;
+      });
+
+      // Generate hour buttons dynamically
+      const hours = [
+        "12 PM",
+        "1 PM",
+        "2 PM",
+        "3 PM",
+        "4 PM",
+        "5 PM",
+        "6 PM",
+        "7 PM",
+        "8 PM",
+        "9 PM",
+        "10 PM",
+        "11 PM",
+        "12 AM",
+      ];
+
+      let selectedHours = [];
+
+      hours.forEach((hour, index) => {
+        const btn = document.createElement("button");
+        btn.classList.add("time-button");
+        btn.textContent = hour;
+        btn.onclick = function () {
+          btn.classList.toggle("selected");
+          if (selectedHours.includes(hour)) {
+            selectedHours = selectedHours.filter((h) => h !== hour);
+          } else {
+            selectedHours.push(hour);
+          }
+        };
+        timeOptionsDiv.appendChild(btn);
+      });
+
+      function sendCalendarInvite() {
+        if (selectedHours.length === 0) {
+          alert("Please select at least one available time.");
+          return;
+        }
+
+        createCalendarEvent(selectedHours);
+        scheduleDiv.classList.add("hidden");
+        closingDiv.classList.remove("hidden");
+      }
+
+      function createCalendarEvent(times) {
+        if (times.length === 0) {
+          alert("Please select at least one available time.");
+          return;
+        }
+
+        const eventDate = "20240214"; // Valentine's Day
+        const startTime = convertToPST(times[0]); // Convert first selected time to PST
+        const endTime = convertToPST(times[times.length - 1]); // Convert last selected time to PST
+        const event = {
+          text: "Valentine's Date with Jason 💖",
+          dates: `${eventDate}T${startTime}00-08:00/${eventDate}T${endTime}00-08:00`, // Adding "00" seconds
+          location: "Romantic Spot",
+          details: "Lunch, Dinner, Movie, TV Show, Kdrama, Games, and/or more!",
+          guests: "jasonnsyu@gmail.com",
+        };
+
+        const googleCalendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
+          event.text
+        )}&dates=${event.dates}&details=${encodeURIComponent(
+          event.details
+        )}&location=${encodeURIComponent(
+          event.location
+        )}&add=${encodeURIComponent(event.guests)}`;
+
+        window.open(googleCalendarUrl, "_blank");
+      }
+
+      function convertToPST(hour) {
+        const hourMap = {
+          "12 PM": "12",
+          "1 PM": "13",
+          "2 PM": "14",
+          "3 PM": "15",
+          "4 PM": "16",
+          "5 PM": "17",
+          "6 PM": "18",
+          "7 PM": "19",
+          "8 PM": "20",
+          "9 PM": "21",
+          "10 PM": "22",
+          "11 PM": "23",
+          "12 AM": "00",
+        };
+
+        return hourMap[hour] + "00"; // Ensure full HHMM format (e.g., 1800)
+      }
+    </script>
+  </body>
+</html>
